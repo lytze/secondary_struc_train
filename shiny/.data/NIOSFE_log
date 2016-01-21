@@ -1,0 +1,30 @@
+2016-01-21 17:38:31: Parsing Command Line Arguments
+2016-01-21 17:38:31: Preparing ANN Class and Methods
+2016-01-21 17:38:31: Loading Training/Testing Data
+2016-01-21 17:38:31: Initializing ANN
+2016-01-21 17:38:31: Training Model
+-------------------- In Loop #1 Error Rate = 0.437
+-------------------- In Loop #2 Error Rate = 0.398
+-------------------- In Loop #3 Error Rate = 0.346
+-------------------- In Loop #4 Error Rate = 0.326
+-------------------- In Loop #5 Error Rate = 0.315
+-------------------- In Loop #6 Error Rate = 0.318
+-------------------- In Loop #7 Error Rate = 0.312
+-------------------- In Loop #8 Error Rate = 0.31
+-------------------- In Loop #9 Error Rate = 0.313
+-------------------- In Loop #10 Error Rate = 0.308
+-------------------- In Loop #11 Error Rate = 0.306
+-------------------- In Loop #12 Error Rate = 0.313
+-------------------- In Loop #13 Error Rate = 0.308
+-------------------- In Loop #14 Error Rate = 0.313
+-------------------- In Loop #15 Error Rate = 0.307
+-------------------- In Loop #16 Error Rate = 0.308
+-------------------- In Loop #17 Error Rate = 0.302
+-------------------- In Loop #18 Error Rate = 0.31
+-------------------- In Loop #19 Error Rate = 0.306
+-------------------- In Loop #20 Error Rate = 0.304
+2016-01-21 17:39:51: Cross Validating
+2016-01-21 17:39:54: Generating Model Report
+2016-01-21 17:39:55: Saving Model Object
+2016-01-21 17:39:55: Clearing Data Files
+2016-01-21 17:39:55: Job is Done

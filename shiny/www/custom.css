@@ -22,7 +22,12 @@
 }
 .help-tool-tip {
     cursor: pointer;
+    text-decoration: none;
+    color: #000;
+    vertical-align: 25%;
+    font-size: smaller;
 }
 .help-tool-tip:hover {
     color: #888;
+    text-decoration: none;
 }

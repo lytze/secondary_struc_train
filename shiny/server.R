@@ -3,6 +3,16 @@ require(shinysky)
 require(knitr)
 require(lattice)
 require(shinyAce)
+helpTip <- function(cont, ...) {
+    a(class = 'fa fa-question-circle help-tool-tip', `data-toggle` = 'tooltip', `data-html` = T,
+      `data-title` = span(cont), ...)
+}
+helpPop <- function(cont, ti = NULL, ...) {
+    a(class = 'fa fa-question-circle help-tool-tip', `data-toggle` = 'popover', `data-html` = T,
+      `data-trigger` = 'hover', `data-title` = ti, `data-placement` = 'top', 
+      `data-content` = span(cont), ...)
+}
+
 shinyServer(function(input, output, session) {
     exist <- readLines('.data/exist_wid')
     pg_qry <- reactiveValues(visit = 'home')
@@ -83,12 +93,15 @@ shinyServer(function(input, output, session) {
             div(class = 'jumbotron',
                 h1('ANN Model'),
                 h2('for Protein Secondary Structure'),
-                p('Train your own', span(style = 'font-weight:400', 'Artificial Neural Network'), 'model and use it to predict protein secondary structure!'),
+                p('Train your own', span(style = 'font-weight:400', 'Artificial Neural Network'),
+                  helpPop('Click the question mark to see Artificial Nueral Network page in Wikipedia.', href = 'https://en.wikipedia.org/wiki/Artificial_neural_network', target = '_blank'),
+                  'model and use it to predict protein secondary structure!'),
                 br(), hr(), br(),
                 actionButton('addNewModelAction', 'Train A New ANN Model', styleclass = 'primary', block = T, icon = 'chevron-right', icon.library = 'font awesome'),
                 actionButton('predictUsingExistingModelsAction', 'Predict Using Existing Models', block = T, icon = 'random', icon.library = 'font awesome'),
                 actionButton('checkTrainingProgressAction', 'Check Your Model Training Progress', block = T, icon = 'check-square-o', icon.library = 'font awesome')
-            )
+            ),
+            tags$script(type = 'text/javascript', src = 'popover-regist.js')
         )
     }
     getAddNewPage <- function() {
@@ -103,11 +116,14 @@ shinyServer(function(input, output, session) {
                             div(class = 'panel panel-primary',
                                 div(class = 'panel-heading',div(class = 'panel-tile', h4('Model Parameters'))),
                                 div(class = 'panel-body',
-                                    sliderInput('addNewIWS', list('Input Layer Window Size', span(class = 'fa fa-question-circle help-tool-tip', `data-toggle` = 'tooltip', title = 'here are some help text')),
+                                    sliderInput('addNewIWS', list('Input Layer Window Size', helpPop(list('Number of residuals', strong('both'), 'to the left and to the right of the target residual that are input.'))),
                                                 min = 5, max = 25, value = 14, step = 1, width = '100%'),
                                     numericInput('addNewHLN', 'Number of Hidden Layers', min = 1, max = 4, value = 1, step = 1, width = '100%'),
                                     uiOutput('addNewHiddenLayers'),
-                                    selectInput('addNewOTY', 'Output Layer Structure Type', choices = c('2 Units with Default as Coils' = 2, '3 Units Each for On Case' = 3), width = '100%')
+                                    selectInput('addNewOTY',
+                                                list('Output Layer Structure Type', helpPop(list('In', strong('2 Units with Default as Coils'), 'we have 2 units represents Helices and Sheets, Coils are output when neither units gives output larger than 0.5.', tags$br(),
+                                                                                                 'In', strong('3 Units Each for On Case'), 'we have 3 units represents each output case, and the one have the greatest value are output.'))),
+                                                choices = c('2 Units with Default as Coils' = 2, '3 Units Each for On Case' = 3), width = '100%')
                                 )
                             )
                         ),
@@ -115,16 +131,22 @@ shinyServer(function(input, output, session) {
                             div(class = 'panel panel-primary',
                                 div(class = 'panel-heading', div(class = 'panel-tile', h4('Training Settings'))),
                                 div(class = 'panel-body',
-                                    numericInput('addNewDCO', 'Displacement Coefficient', min = 0, max = 10, value = 0.1, step = 0.05, width = '100%'),
-                                    sliderInput('addNewCER', 'Critical Error Rate', min = 0.01, max = 0.4, value = 0.2, step = 0.01, width = '100%'),
-                                    sliderInput('addNewMFL', 'Maxium Iteration Number', min = 20, max = 150, value = 20, step = 1, width = '100%'),
-                                    numericInput('addNewRSD', 'Set Random Seed', min = 1, max = 999, value = 1, step = 1, width = '100%')
+                                    numericInput('addNewDCO', list('Displacement Coefficient', helpPop('The factor multiplied to the gradient that are subtracted from the weights and biases in the back probagation process')),
+                                                                   min = 0, max = 10, value = 0.1, step = 0.05, width = '100%'),
+                                    sliderInput('addNewCER', list('Critical Error Rate', helpPop('The training will end when the in-sample error rate for the current iteration is lower than this critical value')),
+                                                min = 0.01, max = 0.4, value = 0.2, step = 0.01, width = '100%'),
+                                    sliderInput('addNewMFL', list('Maxium Iteration Number', helpPop('The training will end when the iteration number excess this number')),
+                                                min = 20, max = 150, value = 20, step = 1, width = '100%'),
+                                    numericInput('addNewRSD', list('Set Random Seed', helpPop('This seed number will ensure the reproducibility if you are using the same data and parameters to run a second time')),
+                                                 min = 1, max = 999, value = 1, step = 1, width = '100%')
                                 )
                             )
                         ),
                         div(class = 'col-md-12',
                             div(class = 'panel panel-primary',
-                                div(class = 'panel-heading', div(class = 'panel-tile', h4('Upload Training Data'))),
+                                div(class = 'panel-heading',
+                                    div(class = 'panel-tile', h4('Upload Training Data'),
+                                        tags$small(strong('File Format:'), tags$br(), 'Only text files are valid. The file should have 2N lines for N peptids. For the i', tags$sup('th'), 'peptide, in the 2i-1 line there should be the peptide sequence in one-char abbriviation, and in the 2i line there should be the correct 2nd structure where \'H\' means helices, \'E\' means sheets and \'-\' means coils.'))),
                                 div(class = 'panel-body',
                                     fileInput('addNewTrain', 'Upload Training Set File', width = '100%'),
                                     fileInput('addNewTest', 'Upload Testing Set File', width = '100%')
@@ -138,7 +160,7 @@ shinyServer(function(input, output, session) {
             ),
             actionButton('addNewSubmitAction', 'Train the Model', styleclass = 'primary', block = T, icon = 'check', icon.library = 'font awesome'),
             actionButton('backToHomeAction', 'Back to Home', block = T, icon = 'chevron-left', icon.library = 'font awesome'),
-            tags$script(type = 'text/javascript', src = 'tooltip-regist.js')
+            tags$script(type = 'text/javascript', src = 'popover-regist.js')
         )
     }
     getPredictPage <- function() {
@@ -150,11 +172,11 @@ shinyServer(function(input, output, session) {
             } else {
                 wid <- pg_qry$wid
                 list(
-                    busyIndicator('TRY'),
                     div(class = 'panel panel-success',
                         div(class = 'panel-heading',
                             div(class = 'panel-title', h4('Secondary Structure Prediction', tags$small('Work ID #', span(class = 'work-id', wid))),
-                                tags$small('Enter sequences or Upload Sequence File to Get Secondary Structure Prediction'))),
+                                tags$small('Enter sequences or Upload Sequence File to Get Secondary Structure Prediction', tags$br(),
+                                           strong('File Format:'), tags$br(), 'Only text files are valid. The file should have N lines for N peptides where each line is a pepteide sequence in one-char abbriviation.'))),
                         div(class = 'panel-body',
                             tabsetPanel(id = 'predSrcType',
                                         tabPanel(title = span(style = 'font-weight:400', 'Text Input'), value = 'text',
@@ -197,24 +219,25 @@ shinyServer(function(input, output, session) {
                         div(class = 'panel-body row',
                             div(class = 'col-md-6', 
                                 div(class = 'panel panel-default',
-                                    div(class = 'panel-heading', div(class = 'panel-title', 'In-Sample Error Rate:', span(class = 'error-rate', f[1]))),
+                                    div(class = 'panel-heading', div(class = 'panel-title', 'In-Sample Error Rate:', span(class = 'error-rate', f[1]), helpPop(list('The rate of false prediction in the', strong('training'), 'data set')))),
                                     div(class = 'panel-body', tags$img(class = 'img-responsive', src = f[2]))
                                 )
                             ),
                             div(class = 'col-md-6', 
                                 div(class = 'panel panel-default',
-                                    div(class = 'panel-heading', div(class = 'panel-title', 'Out-of-Sample Error Rate:', span(class = 'error-rate', f[3]))),
+                                    div(class = 'panel-heading', div(class = 'panel-title', 'Out-of-Sample Error Rate:', span(class = 'error-rate', f[3]), helpPop(list('The rate of false prediction in the', strong('validating/testing'), 'data set')))),
                                     div(class = 'panel-body', tags$img(class = 'img-responsive', src = f[4]))
                                 )
                             ),
                             div(class = 'col-xs-12', span(class = 'fa fa-download'), span(style = 'font-weight:500', 'Download'), 'This Model as:',
-                                span(class = 'fa fa-cubes'), downloadLink('downLoadRObj', 'R Object'), 'or',
-                                span(class = 'fa fa-table'), downloadLink('downLoadCSVCoef', 'Coefficient Tables'))
+                                span(class = 'fa fa-cubes'), downloadLink('downLoadRObj', list('R Object', helpPop(list('The model object and methods saved in an Rdata file, use', tags$code('load()'), 'function in R to extract the model')))), 'or',
+                                span(class = 'fa fa-table'), downloadLink('downLoadCSVCoef', list('Coefficient Tables', helpPop('Zipped file contains CSV files of all weights and bias tables'))))
                         )
                     ),
                     actionButton('toPredictAction', 'Use This Model to Predict', styleclass = 'success', block = T, icon = 'random', icon.library = 'font awesome'),
                     actionButton('backToHomeAction', 'Back to Home', block = T, icon = 'chevron-left', icon.library = 'font awesome'),
-                    actionButton('WIDAnother', 'Change Work ID', block = T, icon = 'undo', icon.library = 'font awesome')
+                    actionButton('WIDAnother', 'Change Work ID', block = T, icon = 'undo', icon.library = 'font awesome'),
+                    tags$script(type = 'text/javascript', src = 'popover-regist.js')
                 )
             }
         }
@@ -287,34 +310,43 @@ shinyServer(function(input, output, session) {
             output$addNewWrong <- renderUI(helpText('Wrong Captcha!'))
             refreshCaptcha()
         } else if (!all(is.null(c(input$addNewTest, input$addNewTrain)))) {
-            wid <- paste(sample(c(0:9, LETTERS), 6, replace = T), collapse = '')
-            while (wid %in% exist) {
+            f <- readLines(input$addNewTrain$datapath)
+            valid <- !any(grepl('[^ARNDCQEGHILKMFPSTWYV]', f[2 * 1:length(f) - 1])) && !any(grepl('[^-HE]', f[2 * 1:length(f)]))
+            f <- readLines(input$addNewTest$datapath)
+            valid <- !any(grepl('[^ARNDCQEGHILKMFPSTWYV]', f[2 * 1:length(f) - 1])) && !any(grepl('[^-HE]', f[2 * 1:length(f)])) && valid
+            if (valid) {
                 wid <- paste(sample(c(0:9, LETTERS), 6, replace = T), collapse = '')
-            }
-            file.copy(from = input$addNewTrain$datapath,
-                      to = paste0('.data/', wid, '_train'))
-            file.remove(input$addNewTrain$datapath)
-            file.copy(from = input$addNewTest$datapath,
-                      to = paste0('.data/', wid, '_test'))
-            file.remove(input$addNewTest$datapath)
-            hlu <- numeric()
-            for (i in 1:input$addNewHLN) {
-                i <- i
-                hlu[i] <- input[[paste0('addNewHLU', i)]]
-            }
-            hlu <- paste(hlu, collapse = ' ')
-            system(paste('./new.R', wid, input$addNewIWS, input$addNewHLN, hlu, input$addNewOTY,
-                         input$addNewDCO, input$addNewCER, input$addNewMFL, input$addNewRSD),
-                   wait = FALSE)
-            pg_qry$visit <- 'check'
-            pg_qry$wid <- wid
-            if (file.exists(paste0('./data', wid, '_sta'))) {
-                pg_qry$state <- readLines(paste0('./data', wid, '_sta'))
+                while (wid %in% exist) {
+                    wid <- paste(sample(c(0:9, LETTERS), 6, replace = T), collapse = '')
+                }
+                file.copy(from = input$addNewTrain$datapath,
+                          to = paste0('.data/', wid, '_train'))
+                file.remove(input$addNewTrain$datapath)
+                file.copy(from = input$addNewTest$datapath,
+                          to = paste0('.data/', wid, '_test'))
+                file.remove(input$addNewTest$datapath)
+                hlu <- numeric()
+                for (i in 1:input$addNewHLN) {
+                    i <- i
+                    hlu[i] <- input[[paste0('addNewHLU', i)]]
+                }
+                hlu <- paste(hlu, collapse = ' ')
+                system(paste('./new.R', wid, input$addNewIWS, input$addNewHLN, hlu, input$addNewOTY,
+                             input$addNewDCO, input$addNewCER, input$addNewMFL, input$addNewRSD),
+                       wait = FALSE)
+                pg_qry$visit <- 'check'
+                pg_qry$wid <- wid
+                if (file.exists(paste0('./data', wid, '_sta'))) {
+                    pg_qry$state <- readLines(paste0('./data', wid, '_sta'))
+                } else {
+                    pg_qry$state <- 'running'
+                }
+                exist <<- c(exist, wid)
+                cat(paste0(wid, '\n'), file = paste0('.data/exist_wid'), append = T)
             } else {
-                pg_qry$state <- 'running'
+                output$addNewWrong <- renderUI(helpText('Invalid File!'))
+                refreshCaptcha()
             }
-            exist <<- c(exist, wid)
-            cat(paste0(wid, '\n'), file = paste0('.data/exist_wid'), append = T)
         }
     })
     observeEvent(input$checkWIDAction, {
