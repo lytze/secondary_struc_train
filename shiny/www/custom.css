@@ -20,3 +20,9 @@
     color: #aa4f37;
     font-weight: 500;
 }
+.help-tool-tip {
+    cursor: pointer;
+}
+.help-tool-tip:hover {
+    color: #888;
+}

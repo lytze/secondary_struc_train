@@ -103,7 +103,8 @@ shinyServer(function(input, output, session) {
                             div(class = 'panel panel-primary',
                                 div(class = 'panel-heading',div(class = 'panel-tile', h4('Model Parameters'))),
                                 div(class = 'panel-body',
-                                    sliderInput('addNewIWS', 'Input Layer Window Size', min = 5, max = 25, value = 14, step = 1, width = '100%'),
+                                    sliderInput('addNewIWS', list('Input Layer Window Size', span(class = 'fa fa-question-circle help-tool-tip', `data-toggle` = 'tooltip', title = 'here are some help text')),
+                                                min = 5, max = 25, value = 14, step = 1, width = '100%'),
                                     numericInput('addNewHLN', 'Number of Hidden Layers', min = 1, max = 4, value = 1, step = 1, width = '100%'),
                                     uiOutput('addNewHiddenLayers'),
                                     selectInput('addNewOTY', 'Output Layer Structure Type', choices = c('2 Units with Default as Coils' = 2, '3 Units Each for On Case' = 3), width = '100%')
@@ -131,16 +132,13 @@ shinyServer(function(input, output, session) {
                             )
                         )
                     ),
-                    div(class = 'row',
-                        div(class = 'col-md-6 col-xs-12', textInput('userCaptcha', NULL, width = '100%')),
-                        div(class = 'col-md-3 col-xs-6', tags$img(class = 'img-responsive', src = pg_qry$captcha$uri)),
-                        div(class = 'col-md-3 col-xs-6', actionButton('changeCaptchaAction', 'Change CAPTCHA', block = T))
-                    ),
+                    uiOutput('captchaPanel', class = 'row'),
                     uiOutput('addNewWrong')
                 )
             ),
             actionButton('addNewSubmitAction', 'Train the Model', styleclass = 'primary', block = T, icon = 'check', icon.library = 'font awesome'),
-            actionButton('backToHomeAction', 'Back to Home', block = T, icon = 'chevron-left', icon.library = 'font awesome')
+            actionButton('backToHomeAction', 'Back to Home', block = T, icon = 'chevron-left', icon.library = 'font awesome'),
+            tags$script(type = 'text/javascript', src = 'tooltip-regist.js')
         )
     }
     getPredictPage <- function() {
@@ -224,6 +222,13 @@ shinyServer(function(input, output, session) {
     
     
     ## Simple Output Renderers
+    output$captchaPanel <- renderUI({
+        list(
+            div(class = 'col-md-6 col-xs-12', textInput('userCaptcha', NULL, width = '100%')),
+            div(class = 'col-md-3 col-xs-6', tags$img(class = 'img-responsive', src = pg_qry$captcha$uri)),
+            div(class = 'col-md-3 col-xs-6', actionButton('changeCaptchaAction', 'Change CAPTCHA', block = T))
+        )
+    })
     output$workProgress <- renderText({
         paste0('<p>', paste0(pg_qry$progress, collapse = '<br/>'), '</p>')
     })
