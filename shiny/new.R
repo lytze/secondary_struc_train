@@ -139,7 +139,8 @@ newANN <- function() {
                 if (err < critical_error) loop <- maxium_loop + 1
                 loop <- loop + 1
             }
-            list(Prediction = upd, Reference = utg)
+            list(Prediction = factor(upd, levels = c('-', 'E', 'H')),
+                 Reference = factor(utg, levels = c('-', 'E', 'H')))
         },
         crossValidate = function(input, target) {
             n <- length(input)
@@ -158,7 +159,8 @@ newANN <- function() {
             }
             upd <- unlist(predicted)
             utg <- unlist(target)
-            list(Prediction = upd, Reference = utg)
+            list(Prediction = factor(upd, levels = c('-', 'E', 'H')),
+                 Reference = factor(utg, levels = c('-', 'E', 'H')))
         },
         predict = function(input) {
             n <- length(input)

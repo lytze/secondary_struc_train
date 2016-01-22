@@ -391,7 +391,7 @@ shinyServer(function(input, output, session) {
             output$predictionResult <- renderUI(helpText('Invalide Input Strings!'))
         } else {
             session$sendCustomMessage('predicting', list(busy = T))
-            res <- isolate(head(pg_qry$env$ann$predict(pred_input)))
+            res <- isolate(pg_qry$env$ann$predict(pred_input))
             session$sendCustomMessage('predicting', list(busy = F))
             output$predictionResult <- renderUI(getPredictionResultPanel(res))
             output$downloadPred <- downloadHandler(
