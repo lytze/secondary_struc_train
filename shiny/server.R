@@ -1,4 +1,5 @@
 require(shiny)
+require(shinythemes)
 require(shinysky)
 require(knitr)
 require(lattice)
@@ -99,7 +100,9 @@ shinyServer(function(input, output, session) {
                 br(), hr(), br(),
                 actionButton('addNewModelAction', 'Train A New ANN Model', styleclass = 'primary', block = T, icon = 'chevron-right', icon.library = 'font awesome'),
                 actionButton('predictUsingExistingModelsAction', 'Predict Using Existing Models', block = T, icon = 'random', icon.library = 'font awesome'),
-                actionButton('checkTrainingProgressAction', 'Check Your Model Training Progress', block = T, icon = 'check-square-o', icon.library = 'font awesome')
+                actionButton('checkTrainingProgressAction', 'Check Your Model Training Progress', block = T, icon = 'check-square-o', icon.library = 'font awesome'),
+                br(),
+                tags$small("Download test data:", downloadLink("testdata", label = "testdata.zip"))
             ),
             tags$script(type = 'text/javascript', src = 'popover-regist.js')
         )
@@ -243,7 +246,10 @@ shinyServer(function(input, output, session) {
         }
     }
     
-    
+    ## Download data Handler
+    output$testdata <- downloadHandler("testdata.zip", function(file) {
+        system(paste0("cp testdata/testdata.zip ", file))
+    })
     ## Simple Output Renderers
     output$captchaPanel <- renderUI({
         list(
