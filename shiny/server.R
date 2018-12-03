@@ -16,7 +16,7 @@ helpPop <- function(cont, ti = NULL, ...) {
 
 shinyServer(function(input, output, session) {
     if (!dir.exists(".data")) system("mkdir .data")
-    if (!dir.create(".tmp")) system("mkdir .tmp")
+    if (!dir.exists(".tmp")) system("mkdir .tmp")
     if (file.exists(".data/exist_wid")) {
         exist <- readLines('.data/exist_wid')
     } else {
