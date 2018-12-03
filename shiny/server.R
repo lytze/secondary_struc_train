@@ -15,7 +15,14 @@ helpPop <- function(cont, ti = NULL, ...) {
 }
 
 shinyServer(function(input, output, session) {
-    exist <- readLines('.data/exist_wid')
+    if (!dir.exists(".data")) system("mkdir .data")
+    if (!dir.create(".tmp")) system("mkdir .tmp")
+    if (file.exists(".data/exist_wid")) {
+        exist <- readLines('.data/exist_wid')
+    } else {
+        system("touch .data/exist_wid")
+        exist <- readLines('.data/exist_wid')
+    }
     pg_qry <- reactiveValues(visit = 'home')
     timer <- reactiveTimer(200, session)
     
